@@ -3,7 +3,7 @@ html = "";
 
 html = "<table>";
 
-var totalSubgrids = 4;
+var totalSubgrids = 9;
 var totalSubdivisions = Math.sqrt(totalSubgrids);
 var allowedValues = [];
 var matrix = [];
@@ -65,15 +65,15 @@ function handleKeyup(e) {
     var value = parseInt(e.target.value);
     var row, col, sect;
 
-    console.log("value is?", value);
+//    console.log("value is?", value);
 
-
+    console.log(getSelectionText());
     if (allowedValues.indexOf(value) === -1) {
-        console.log("keyup, not valid value");
+//        console.log("keyup, not valid value");
         return;
     }
 
-    console.log("valid input!", allowedValues, matrix);
+//    console.log("valid input!", allowedValues, matrix);
     row = matrix["row" + e.target.dataset.row];
     col = matrix["col" + e.target.dataset.col];
     sect = matrix["sect" + e.target.dataset.sect];
@@ -82,6 +82,7 @@ function handleKeyup(e) {
         row.push(value);
     } else {
         console.error(value + " already exists in row");
+        e.target.value = "";
     }
 
     if (col.indexOf(value) === -1) {
@@ -96,12 +97,22 @@ function handleKeyup(e) {
         console.error(value + " already exists in sect");
     }
 
-    console.log("row", row, "col", col, "sect", sect);
+//    console.log("row", row, "col", col, "sect", sect);
 
-    console.log("subgrid", e.target.dataset.sect, "row", e.target.dataset.row, "col", e.target.dataset.col, "value", parseInt(e.target.value));
+//    console.log("subgrid", e.target.dataset.sect, "row", e.target.dataset.row, "col", e.target.dataset.col, "value", parseInt(e.target.value));
     console.log("puzzleSolved?", isPuzzleSolved());
 
 
+}
+
+function getSelectionText() {
+    var text = "";
+    if (window.getSelection) {
+        text = window.getSelection().toString();
+    } else if (document.selection && document.selection.type != "Control") {
+        text = document.selection.createRange().text;
+    }
+    return text;
 }
 
 function handlekeyDown(e) {
@@ -109,31 +120,32 @@ function handlekeyDown(e) {
     var row, col, sect;
 
     if (allowedValues.indexOf(value) === -1) {
-        console.log("keydown, not valid value");
+//        console.log("keydown, not valid value");
         return;
     }
 
+    console.log(getSelectionText());
     if (e.keyCode == 8) {
-        console.log("keydown delete pressed, what is value?", value);
+//        console.log("keydown delete pressed, what is value?", value);
         row = matrix["row" + e.target.dataset.row];
         col = matrix["col" + e.target.dataset.col];
         sect = matrix["sect" + e.target.dataset.sect];
 
         if (row.indexOf(value) !== -1) {
-            console.log(value, "found, deleting it from row array");
+//            console.log(value, "found, deleting it from row array");
             row.splice(row.indexOf(value));
             col.splice(col.indexOf(value));
             sect.splice(sect.indexOf(value));
         }
 
         if (col.indexOf(value) !== -1) {
-            console.log(value, "found, deleting it from col array");
+//            console.log(value, "found, deleting it from col array");
             col.splice(col.indexOf(value));
             sect.splice(sect.indexOf(value));
         }
 
         if (sect.indexOf(value) !== -1) {
-            console.log(value, "found, deleting it from sect array");
+//            console.log(value, "found, deleting it from sect array");
             sect.splice(sect.indexOf(value));
         }
     }
