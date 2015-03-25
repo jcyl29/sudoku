@@ -1,3 +1,6 @@
+var styleHTML = "" +
+    ".odd { background: blue; }";
+
 var row, col;
 html = "";
 
@@ -8,18 +11,12 @@ var totalSubdivisions = Math.sqrt(totalSubgrids);
 var allowedValues = [];
 var matrix = [];
 
+var ignoreKeycodes = [37, 38, 39, 40];
+
 //check square;
 if (totalSubgrids !== Math.pow(Math.ceil(Math.sqrt(totalSubgrids)),2)) {
     throw Error("number is not a square!");
 }
-
-//for (var i = 1; i <= totalSubgrids; i++ ){
-//    allowedValues.push(i);
-//    matrix["row"+i] = [];
-//    matrix["col"+i] = [];
-////    matrix[""]
-//    //build array here?
-//}
 
 function isPuzzleSolved() {
     for (var i = 1; i <= totalSubgrids; i++) {
@@ -49,7 +46,7 @@ for (row = 1; row <= totalSubgrids; row++) {
 
         html += "<td>" +
 //            "<input maxlength=1 size=20 type='text' value='" + row + col + "isOdd=" + oddClassName + "'></td>";
-            "<input placeholder='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'></td>";
+            "<input style='width: 2em; height: 2em; font-size: 2em;' title='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'></td>";
     }
 
 
@@ -65,7 +62,26 @@ function handleKeyup(e) {
     var value = parseInt(e.target.value);
     var row, col, sect;
 
-//    console.log("value is?", value);
+    console.log("value is?", value, "key?", e.keyCode);
+
+//    if (e.target.value.length === 1) {
+//        console.log("keyup!, input already has a value, exit!");
+//    }
+
+    if (ignoreKeycodes.indexOf(e.keyCode) !== -1) {
+        console.log(e.type,"igorning keycodes");
+        return;
+    }
+
+    if (isPuzzleSolved()) {
+        console.log("already solved!");
+        return;
+    }
+
+    if (isNaN(value)) {
+        console.log("not a number");
+        return;
+    }
 
     console.log(getSelectionText());
     if (allowedValues.indexOf(value) === -1) {
@@ -82,7 +98,7 @@ function handleKeyup(e) {
         row.push(value);
     } else {
         console.error(value + " already exists in row");
-        e.target.value = "";
+//        e.target.value = "";
     }
 
     if (col.indexOf(value) === -1) {
@@ -118,6 +134,21 @@ function getSelectionText() {
 function handlekeyDown(e) {
     var value = parseInt(e.target.value);
     var row, col, sect;
+
+    if (isPuzzleSolved()) {
+        console.log("already solved!");
+        return;
+    }
+
+    if (ignoreKeycodes.indexOf(e.keyCode) !== -1) {
+        console.log(e.type,"igorning keycodes");
+        return;
+    }
+
+
+//    if (e.target.value.length === 1) {
+//        console.log("keydown, input already has a value, exit!");
+//    }
 
     if (allowedValues.indexOf(value) === -1) {
 //        console.log("keydown, not valid value");
