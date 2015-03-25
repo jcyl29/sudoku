@@ -3,10 +3,15 @@ html = "";
 
 html = "<table>";
 
-var totalSubgrids = 9;
+var totalSubgrids = 4;
 var totalSubdivisions = Math.sqrt(totalSubgrids);
 var allowedValues = [];
 var matrix = [];
+
+//check square;
+if (totalSubgrids !== Math.pow(Math.ceil(Math.sqrt(totalSubgrids)),2)) {
+    throw Error("number is not a square!");
+}
 
 //for (var i = 1; i <= totalSubgrids; i++ ){
 //    allowedValues.push(i);
@@ -15,6 +20,17 @@ var matrix = [];
 ////    matrix[""]
 //    //build array here?
 //}
+
+function isPuzzleSolved() {
+    for (var i = 1; i <= totalSubgrids; i++) {
+        console.info("row" + i, matrix["row" + i].length);
+        if (matrix["row" + i].length != totalSubgrids) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 for (row = 1; row <= totalSubgrids; row++) {
     matrix["row" + row] = [];
@@ -65,24 +81,26 @@ function handleKeyup(e) {
     if (row.indexOf(value) === -1) {
         row.push(value);
     } else {
-        console.log(value + " already exists in row");
+        console.error(value + " already exists in row");
     }
 
     if (col.indexOf(value) === -1) {
         col.push(value);
     } else {
-        console.log(value + " already exists in col");
+        console.error(value + " already exists in col");
     }
 
     if (sect.indexOf(value) === -1) {
         sect.push(value);
     } else {
-        console.log(value + " already exists in sect");
+        console.error(value + " already exists in sect");
     }
 
     console.log("row", row, "col", col, "sect", sect);
 
     console.log("subgrid", e.target.dataset.sect, "row", e.target.dataset.row, "col", e.target.dataset.col, "value", parseInt(e.target.value));
+    console.log("puzzleSolved?", isPuzzleSolved());
+
 
 }
 
@@ -102,24 +120,23 @@ function handlekeyDown(e) {
         sect = matrix["sect" + e.target.dataset.sect];
 
         if (row.indexOf(value) !== -1) {
-            console.log(value,"found, deleting it from row array");
+            console.log(value, "found, deleting it from row array");
             row.splice(row.indexOf(value));
             col.splice(col.indexOf(value));
             sect.splice(sect.indexOf(value));
         }
 
         if (col.indexOf(value) !== -1) {
-            console.log(value,"found, deleting it from col array");
+            console.log(value, "found, deleting it from col array");
             col.splice(col.indexOf(value));
             sect.splice(sect.indexOf(value));
         }
 
         if (sect.indexOf(value) !== -1) {
-            console.log(value,"found, deleting it from sect array");
+            console.log(value, "found, deleting it from sect array");
             sect.splice(sect.indexOf(value));
         }
     }
-
 }
 
 var t = document.getElementsByTagName("table")[0];
