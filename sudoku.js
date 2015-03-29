@@ -177,10 +177,13 @@ Sudoku = {
         table.addEventListener("blur", this.handleBlur.bind(this), true);
 
         table.addEventListener("keyup", this.handleKeyup.bind(this));
-        this.buildRandomValues();
+        if (conf.prefillBoard) {
+            this.buildRandomValues();
+        }
+
     }
 };
 
-Sudoku.init({totalSubgrids: 4});
+Sudoku.init({totalSubgrids: 4, prefillBoard: true});
 
 
