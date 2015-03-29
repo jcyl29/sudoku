@@ -3,11 +3,10 @@ if (!window.Sudoku) {
 }
 
 Sudoku = {
-    totalSubgrids: 9,
+    totalSubgrids: null,
     totalSubdivisions: null,
     allowedValues: [],
     matrix: [],
-    ignoreKeycodes: [37, 38, 39, 40],
     isPuzzleSolved: function () {
         var i;
 
@@ -66,9 +65,8 @@ Sudoku = {
 
     handleBlur: function (e) {
         console.log(e.type);
-
-        var value = parseInt(e.target.value);
-        var row, col, sect;
+        var data = {};
+        data.value = parseInt(e.target.value);
 
         if (this.isPuzzleSolved()) {
             console.log("already solved!");
@@ -76,35 +74,93 @@ Sudoku = {
         }
 
 
-        if (this.allowedValues.indexOf(value) === -1) {
-//        console.log("keydown, not valid value");
-            return;
-        }
+//        if (this.allowedValues.indexOf(value) === -1) {
+////        console.log("keydown, not valid value");
+//            return;
+//        }
 
-        row = this.matrix["row" + e.target.dataset.row];
-        col = this.matrix["col" + e.target.dataset.col];
-        sect = this.matrix["sect" + e.target.dataset.sect];
+        data.rowId = "row" + e.target.dataset.row;
+        data.colId = "col" + e.target.dataset.col;
+        data.sectId = "sect" + e.target.dataset.sect;
+
+        this.validateNumber(data);
+    },
+
+    validateNumber: function (data) {
+        var row, col, sect, value, silent, result = true;
+
+        value = data.value;
+        silent = data.silent;
+        row = this.matrix[data.rowId];
+        col = this.matrix[data.colId];
+        sect = this.matrix[data.sectId];
 
         if (row.indexOf(value) === -1) {
             row.push(value);
         } else {
-            console.error(value + " already exists in row");
+            if (!silent) {
+                console.error(value + " already exists in row");
+            }
+            result = false;
 //        e.target.value = "";
         }
 
         if (col.indexOf(value) === -1) {
             col.push(value);
         } else {
-            console.error(value + " already exists in col");
+            if (!silent) {
+                console.error(value + " already exists in col");
+            }
+            result = false;
         }
 
         if (sect.indexOf(value) === -1) {
             sect.push(value);
         } else {
-            console.error(value + " already exists in sect");
+            if (!silent) {
+                console.error(value + " already exists in sect");
+            }
+            result = false;
         }
 
+        return result;
+
         console.log("row", row, "col", col, "sect", sect);
+    },
+
+    buildRandomValue: function () {
+        var totalSubgrids = this.totalSubgrids,
+            randomRow = Math.ceil(Math.random() * totalSubgrids),
+            randomCol = Math.ceil(Math.random() * totalSubgrids),
+            randomValue = Math.ceil(Math.random() * totalSubgrids),
+            sectId,
+            data = {};
+
+        randomInput = Array.prototype.filter.call(document.getElementsByTagName("input"), function (a) {
+            return a.dataset.row == randomRow && a.dataset.col == randomCol;
+        });
+
+        randomInput = randomInput[0];
+        sectId = randomInput.dataset.sect;
+
+        data.value = randomValue;
+        data.rowId = "row" + randomRow;
+        data.colId = "col" + randomCol;
+        data.sectId = "sect" + sectId;
+        data.silent = true;
+
+        if (this.validateNumber(data)) {
+            randomInput.value = randomValue;
+        }
+    },
+
+    buildRandomValues: function () {
+        //arbitrary choose totalSubgrids as the amount of random values to put
+        //on the board;
+
+        for (var i = 0; i < this.totalSubgrids; i++) {
+            this.buildRandomValue();
+        }
     },
 
     init: function (conf) {
@@ -117,10 +173,14 @@ Sudoku = {
 
         table = document.getElementById("sudoku-table");
 
+        //can event capturing, don't need to worry about IE that don't support it
         table.addEventListener("blur", this.handleBlur.bind(this), true);
-        table.addEventListener("keyup", this.handleKeyup.bind(this));
 
+        table.addEventListener("keyup", this.handleKeyup.bind(this));
+        this.buildRandomValues();
     }
 };
 
 Sudoku.init({totalSubgrids: 4});
+
+
