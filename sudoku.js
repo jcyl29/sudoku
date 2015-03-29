@@ -82,12 +82,17 @@ Sudoku = {
         data.rowId = "row" + e.target.dataset.row;
         data.colId = "col" + e.target.dataset.col;
         data.sectId = "sect" + e.target.dataset.sect;
+        data.isPrefilled = e.target.className.indexOf("prefilled") !== -1;
 
         this.validateNumber(data);
     },
 
     validateNumber: function (data) {
         var row, col, sect, value, silent, result = true;
+
+        if (data.isPrefilled) {
+            return;
+        }
 
         value = data.value;
         silent = data.silent;
@@ -142,6 +147,7 @@ Sudoku = {
 
         randomInput = randomInput[0];
         sectId = randomInput.dataset.sect;
+        randomInput.className = "prefilled";
 
         data.value = randomValue;
         data.rowId = "row" + randomRow;
