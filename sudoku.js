@@ -8,10 +8,11 @@ Sudoku = {
     allowedValues: [],
     matrix: [],
     isPuzzleSolved: function () {
+//        the puzzle is solved when all rows have lengths equal to the totalSubgrids
         var i;
 
         for (i = 1; i <= this.totalSubgrids; i++) {
-            console.info("row" + i, this.matrix["row" + i].length);
+            console.info("row" + i, this.matrix["row" + i].length, this.matrix["row" + i]);
             if (this.matrix["row" + i].length != this.totalSubgrids) {
                 return false;
             }
@@ -64,7 +65,6 @@ Sudoku = {
     },
 
     handleBlur: function (e) {
-        console.log(e.type);
         var data = {};
         data.value = parseInt(e.target.value);
 
@@ -73,11 +73,9 @@ Sudoku = {
             return;
         }
 
-
-//        if (this.allowedValues.indexOf(value) === -1) {
-////        console.log("keydown, not valid value");
-//            return;
-//        }
+        if (this.allowedValues.indexOf(data.value) === -1) {
+            return;
+        }
 
         data.rowId = "row" + e.target.dataset.row;
         data.colId = "col" + e.target.dataset.col;
@@ -107,7 +105,6 @@ Sudoku = {
                 console.error(value + " already exists in row");
             }
             result = false;
-//        e.target.value = "";
         }
 
         if (col.indexOf(value) === -1) {
