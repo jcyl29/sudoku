@@ -6,6 +6,56 @@ html = "";
 
 html = "<table>";
 
+if (!window.Sudoku) {
+    window.Sudoku = {};
+}
+
+Sudoku = {
+    totalSubgrids: 9,
+    totalSubdivisions: null,
+    allowedValues: [],
+    matrix: [],
+    ignoreKeycodes: [37, 38, 39, 40],
+    buildGrid: function () {
+        var row, sectRow, sectCol, sectId, oddClassName, html = "";
+
+        for (row = 1; row <= this.totalSubgrids; row++) {
+            this.matrix["row" + row] = [];
+            this.matrix["col" + row] = [];
+
+            this.allowedValues.push(row);
+            html += "<tr>";
+            for (col = 1; col <= this.totalSubgrids; col++) {
+                sectRow = Math.ceil(row / totalSubdivisions);
+                sectCol = Math.ceil(col / totalSubdivisions);
+                sectId = sectRow + "" + sectCol;
+                oddClassName = ((sectCol + sectRow) % 2 !== 0) ? "odd" : "";
+                if (!matrix["sect" + sectId]) {
+                    matrix["sect" + sectId] = [];
+                }
+
+                html += "<td>" +
+                    //            "<input maxlength=1 size=20 type='text' value='" + row + col + "isOdd=" + oddClassName + "'></td>";
+                    "<input style='width: 2em; height: 2em; font-size: 2em;' title='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'></td>";
+            }
+        }
+
+        html += "</tr>";
+        html += "</table>";
+        document.body.innerHTML = html;
+    },
+    init: function (conf) {
+        conf = conf || {};
+        this.totalSubgrids = conf.totalSubgrids || 9;
+        this.totalSubdivisions = Math.sqrt(this.totalSubgrids);
+        this.buildGrid();
+    }
+};
+
+Sudoku.init();
+
+//LISTEN ON BLUR! NOT KEYDOWN,KEYUP!!!
+
 var totalSubgrids = 9;
 var totalSubdivisions = Math.sqrt(totalSubgrids);
 var allowedValues = [];
