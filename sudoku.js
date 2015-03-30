@@ -68,11 +68,6 @@ Sudoku = {
         var data = {};
         data.value = parseInt(e.target.value);
 
-        if (this.isPuzzleSolved()) {
-            console.log("already solved!");
-            return;
-        }
-
         if (this.allowedValues.indexOf(data.value) === -1) {
             return;
         }
@@ -84,9 +79,10 @@ Sudoku = {
         this.validateNumber(data);
     },
 
-    validateNumber: function (data) {
-        var row, col, sect, value, silent, result = true;
+    validateNumber: function (data, input) {
+        var row, rowUniq, col, colUniq, sect, sectUniq, value, silent, result = true;
 
+        if (input && input.value) {
             return;
         }
 
@@ -96,29 +92,25 @@ Sudoku = {
         col = this.matrix[data.colId];
         sect = this.matrix[data.sectId];
 
-        if (row.indexOf(value) === -1) {
+        rowUniq = row.indexOf(value) === -1;
+        colUniq = col.indexOf(value) === -1;
+        sectUniq = sect.indexOf(value) === -1;
+
+        if (rowUniq && colUniq && sectUniq) {
             row.push(value);
-        } else {
-            if (!silent) {
-                console.error(value + " already exists in row");
-            }
-            result = false;
-        }
-
-        if (col.indexOf(value) === -1) {
             col.push(value);
-        } else {
-            if (!silent) {
-                console.error(value + " already exists in col");
-            }
-            result = false;
-        }
-
-        if (sect.indexOf(value) === -1) {
             sect.push(value);
         } else {
             if (!silent) {
-                console.error(value + " already exists in sect");
+                if (!rowUniq) {
+                    console.error(value + " already exists in row", data.rowId);
+                }
+                if (!colUniq) {
+                    console.error(value + " already exists in col", data.colId);
+                }
+                if (!sectUniq) {
+                    console.error(value + " already exists in sect", data.sectId);
+                }
             }
             result = false;
         }
@@ -149,7 +141,9 @@ Sudoku = {
         data.sectId = "sect" + sectId;
         data.silent = true;
 
-        if (this.validateNumber(data)) {
+        console.log(data);
+
+        if (this.validateNumber(data, randomInput)) {
             randomInput.value = randomValue;
         }
     },
@@ -181,6 +175,9 @@ Sudoku = {
             this.buildRandomValues();
         }
 
+//        for (i = 1; i <= this.totalSubgrids; i++) {
+//            console.info("row" + i, this.matrix["row" + i]);
+//        }
     }
 };
 
