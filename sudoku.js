@@ -144,7 +144,7 @@ Sudoku = {
 
         randomInput = randomInput[0];
         sectId = randomInput.dataset.sect;
-        randomInput.className = "prefilled";
+        randomInput.className += " prefilled";
 
         data.value = randomValue;
         data.rowId = "row" + randomRow;
