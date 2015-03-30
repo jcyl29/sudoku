@@ -46,7 +46,7 @@ Sudoku = {
 
                 html += "<td>" +
 //                                "<input maxlength=1 size=20 type='text' value='" + row + col + "isOdd=" + oddClassName + "'></td>";
-                    "<input style='width: 2em; height: 2em; font-size: 2em;' title='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'></td>";
+                    "<input style='width: 2em; height: 2em; font-size: 2em;' title='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'><input type='hidden'></td>";
             }
         }
 
@@ -65,24 +65,118 @@ Sudoku = {
     },
 
     handleBlur: function (e) {
-        var data = {};
+        var target = e.target,
+            hiddenInput = target.nextSibling,
+            data = {};
+
         data.value = parseInt(e.target.value);
+
+        console.log("blur, target value=", data.value, " hidden input value", hiddenInput.value);
 
         if (this.allowedValues.indexOf(data.value) === -1) {
             return;
         }
 
-        data.rowId = "row" + e.target.dataset.row;
-        data.colId = "col" + e.target.dataset.col;
-        data.sectId = "sect" + e.target.dataset.sect;
+        if (data.value === parseInt(hiddenInput.value)) {
+            console.info("blur input same as hidden input, exit");
+            hiddenInput.value = "";
+            return;
+        }
+
+        data.rowId = "row" + target.dataset.row;
+        data.colId = "col" + target.dataset.col;
+        data.sectId = "sect" + target.dataset.sect;
+
+        if (hiddenInput.value && data.value !== parseInt(hiddenInput.value)) {
+            console.error("blur input different from as hidden input, delete hidden input");
+            if (!this.numberExistsInGrid(data)) {
+                this.removeInputValueFromMatrix(target, hiddenInput.value);
+            }
+            hiddenInput.value = "";
+        }
+
 
         this.validateNumber(data);
     },
+
+    removeInputValueFromMatrix: function (input, value) {
+        var row, col, sect;
+
+        value = parseInt(value);
+
+        row = this.matrix["row" + input.dataset.row];
+        col = this.matrix["col" + input.dataset.col];
+        sect = this.matrix["sect" + input.dataset.sect];
+
+        if (row.indexOf(value) !== -1) {
+            console.log(value, "found, deleting it from row array");
+            row.splice(row.indexOf(value));
+            col.splice(col.indexOf(value));
+            sect.splice(sect.indexOf(value));
+        }
+
+        if (col.indexOf(value) !== -1) {
+            console.log(value, "found, deleting it from col array");
+            col.splice(col.indexOf(value));
+            sect.splice(sect.indexOf(value));
+        }
+
+        if (sect.indexOf(value) !== -1) {
+            console.log(value, "found, deleting it from sect array");
+            sect.splice(sect.indexOf(value));
+        }
+    },
+
+    handleFocus: function(e) {
+        var target = e.target,
+            value = parseInt(target.value),
+            hiddenInput = target.nextSibling;
+
+        if (this.allowedValues.indexOf(value) === -1) {
+            console.log("focus event, bad input");
+            return;
+        }
+
+        console.log("putting ", value, " in ", hiddenInput);
+        hiddenInput.value = value;
+    },
+
+    numberExistsInGrid: function (data) {
+        var row, col, value;
+
+        value = data.value;
+        row = this.matrix[data.rowId];
+        col = this.matrix[data.colId];
+        sect = this.matrix[data.sectId];
+
+        if (row.indexOf(value) === -1) {
+            console.log(value, "already exists in row", data.rowId);
+            return true;
+        }
+
+        if (col.indexOf(value) === -1) {
+            console.log(value, "already exists in col", data.colId);
+            return true;
+        }
+
+        if (sect.indexOf(value) === -1) {
+            console.log(value, "already exists in sect", data.sectId);
+            return true;
+        }
+
+        return false;
+    },
+
 
     validateNumber: function (data, input) {
         var row, rowUniq, col, colUniq, sect, sectUniq, value, silent, result = true;
 
         if (input && input.value) {
+            return;
+        }
+
+        if (this.isPuzzleSolved()) {
+            console.warn("already solved!");
             return;
         }
 
@@ -115,9 +209,11 @@ Sudoku = {
             result = false;
         }
 
+        if (this.isPuzzleSolved()) {
+            console.warn("already solved!");
+            return;
+        }
         return result;
-
-        console.log("row", row, "col", col, "sect", sect);
     },
 
     buildRandomValue: function () {
@@ -169,6 +265,7 @@ Sudoku = {
 
         //can event capturing, don't need to worry about IE that don't support it
         table.addEventListener("blur", this.handleBlur.bind(this), true);
+        table.addEventListener("focus", this.handleFocus.bind(this), true);
 
         table.addEventListener("keyup", this.handleKeyup.bind(this));
         if (conf.prefillBoard) {
