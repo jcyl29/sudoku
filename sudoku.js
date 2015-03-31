@@ -25,7 +25,7 @@ Sudoku = {
         //build the html for the sudoku
         //assign the arrays to store the column, row, and section values
 
-        var row, sectRow, sectCol, sectId, oddClassName, html;
+        var row, sectRow, sectCol, sectId, oddClassName, html, sectionBorderClasses;
 
         html = "<table id='sudoku-table'>";
 
@@ -40,11 +40,23 @@ Sudoku = {
                 sectCol = Math.ceil(col / this.totalSubdivisions);
                 sectId = sectRow + "" + sectCol;
                 oddClassName = ((sectCol + sectRow) % 2 !== 0) ? "odd" : "";
+
+                sectionBorderClasses = [];
+                if (row % this.totalSubdivisions == 0 && this.totalSubgrids / row !== 1) {
+                    sectionBorderClasses.push("section-row-border");
+                }
+
                 if (!this.matrix["sect" + sectId]) {
                     this.matrix["sect" + sectId] = [];
                 }
 
-                html += "<td>" +
+                if (col % this.totalSubdivisions == 0 && this.totalSubgrids / col !== 1) {
+                    sectionBorderClasses.push("section-col-border");
+                }
+
+                sectionBorderClasses = sectionBorderClasses.join(" ");
+
+                html += "<td class='" + sectionBorderClasses + "'>" +
 //                                "<input maxlength=1 size=20 type='text' value='" + row + col + "isOdd=" + oddClassName + "'></td>";
                     "<input style='width: 2em; height: 2em; font-size: 2em;' title='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'><input type='hidden'></td>";
             }
