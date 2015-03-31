@@ -3,17 +3,17 @@ if (!window.Sudoku) {
 }
 
 Sudoku = {
-    totalSubgrids: null,
+    gridLength: null,
     totalSubdivisions: null,
     allowedValues: [],
     matrix: [],
     isPuzzleSolved: function () {
-//        the puzzle is solved when all rows have lengths equal to the totalSubgrids
+//        the puzzle is solved when all rows have lengths equal to the gridLength
         var i;
 
-        for (i = 1; i <= this.totalSubgrids; i++) {
+        for (i = 1; i <= this.gridLength; i++) {
             console.info("row" + i, this.matrix["row" + i].length, this.matrix["row" + i]);
-            if (this.matrix["row" + i].length != this.totalSubgrids) {
+            if (this.matrix["row" + i].length != this.gridLength) {
                 return false;
             }
         }
@@ -29,20 +29,20 @@ Sudoku = {
 
         html = "<table id='sudoku-table'>";
 
-        for (row = 1; row <= this.totalSubgrids; row++) {
+        for (row = 1; row <= this.gridLength; row++) {
             this.matrix["row" + row] = [];
             this.matrix["col" + row] = [];
 
             this.allowedValues.push(row);
             html += "<tr>";
-            for (col = 1; col <= this.totalSubgrids; col++) {
+            for (col = 1; col <= this.gridLength; col++) {
                 sectRow = Math.ceil(row / this.totalSubdivisions);
                 sectCol = Math.ceil(col / this.totalSubdivisions);
                 sectId = sectRow + "" + sectCol;
                 oddClassName = ((sectCol + sectRow) % 2 !== 0) ? "odd" : "";
 
                 sectionBorderClasses = [];
-                if (row % this.totalSubdivisions == 0 && this.totalSubgrids / row !== 1) {
+                if (row % this.totalSubdivisions == 0 && this.gridLength / row !== 1) {
                     sectionBorderClasses.push("section-row-border");
                 }
 
@@ -50,7 +50,7 @@ Sudoku = {
                     this.matrix["sect" + sectId] = [];
                 }
 
-                if (col % this.totalSubdivisions == 0 && this.totalSubgrids / col !== 1) {
+                if (col % this.totalSubdivisions == 0 && this.gridLength / col !== 1) {
                     sectionBorderClasses.push("section-col-border");
                 }
 
@@ -58,7 +58,9 @@ Sudoku = {
 
                 html += "<td class='" + sectionBorderClasses + "'>" +
 //                                "<input maxlength=1 size=20 type='text' value='" + row + col + "isOdd=" + oddClassName + "'></td>";
-                    "<input style='width: 2em; height: 2em; font-size: 2em;' title='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'><input type='hidden'></td>";
+//                    "<input style='width: 2em; height: 2em; font-size: 2em;' title='" + row + col + ",sg=" + sectId + ",isOdd=" + oddClassName + "' data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'><input type='hidden'></td>";
+                    "<input data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'><input type='hidden'>" +
+                    "</td>";
             }
         }
 
@@ -67,16 +69,78 @@ Sudoku = {
         document.body.innerHTML = html;
     },
 
-    handleKeyup: function (e) {
-        console.log(e.type);
-        if (this.isPuzzleSolved()) {
-            console.warn("already solved!");
-            return;
+    handleKeyDown: function (e) {
+        //keydown handling is specifically for deleting values from the lookup arrays (row, column, section)
+        var keyCode = e.keyCode,
+            target = e.target,
+            deleteKey = (keyCode == 46), backspaceKey = (keyCode == 8),
+            sel, deletedText, val,
+            data = {},
+            getInputSelection = function (input) {
+                var start = 0,
+                    end = 0;
+
+                start = input.selectionStart;
+                end = input.selectionEnd;
+                return {
+                    start: start,
+                    end: end,
+                    length: end - start
+                };
+            };
+
+        data.rowId = "row" + target.dataset.row;
+        data.colId = "col" + target.dataset.col;
+        data.sectId = "sect" + target.dataset.sect;
+
+        if (deleteKey || backspaceKey) {
+            val = e.target.value;
+            sel = getInputSelection(e.target);
+            if (sel.length) {
+                deletedText = val.slice(sel.start, sel.end);
+            } else {
+                deletedText = val.charAt(deleteKey ? sel.start : sel.start - 1);
+            }
+
+            data.value = parseInt(deletedText);
+            if (!this.numberExistsInGrid(data)) {
+                this.removeInputValueFromMatrix(e.target, deletedText);
+            }
+        }
+    },
+
+    numberExistsInGrid: function (data) {
+        //we need to check if the value exists in the lookup arrays (row, column, section)
+        //before deleting them
+        var row, col, value;
+
+        value = data.value;
+        row = this.matrix[data.rowId];
+        col = this.matrix[data.colId];
+        sect = this.matrix[data.sectId];
+
+        if (row.indexOf(value) === -1) {
+            console.log(value, "already exists in ", data.rowId);
+            return true;
         }
 
+        if (col.indexOf(value) === -1) {
+            console.log(value, "already exists in ", data.colId);
+            return true;
+        }
+
+        if (sect.indexOf(value) === -1) {
+            console.log(value, "already exists in ", data.sectId);
+            return true;
+        }
+
+        return false;
     },
 
     handleBlur: function (e) {
+        //the blur handler is used in tandem with focus handler to check
+        //for values that are deleted by typing over the previous one
+
         var target = e.target,
             hiddenInput = target.nextSibling,
             data = {};
@@ -107,39 +171,13 @@ Sudoku = {
             hiddenInput.value = "";
         }
 
-
         this.validateNumber(data);
     },
 
-    removeInputValueFromMatrix: function (input, value) {
-        var row, col, sect;
+    handleFocus: function (e) {
+        //the focus handler is set a value to the hidden input, which is always a sibling of the visible
+        //text input
 
-        value = parseInt(value);
-
-        row = this.matrix["row" + input.dataset.row];
-        col = this.matrix["col" + input.dataset.col];
-        sect = this.matrix["sect" + input.dataset.sect];
-
-        if (row.indexOf(value) !== -1) {
-            console.log(value, "found, deleting it from row array");
-            row.splice(row.indexOf(value));
-            col.splice(col.indexOf(value));
-            sect.splice(sect.indexOf(value));
-        }
-
-        if (col.indexOf(value) !== -1) {
-            console.log(value, "found, deleting it from col array");
-            col.splice(col.indexOf(value));
-            sect.splice(sect.indexOf(value));
-        }
-
-        if (sect.indexOf(value) !== -1) {
-            console.log(value, "found, deleting it from sect array");
-            sect.splice(sect.indexOf(value));
-        }
-    },
-
-    handleFocus: function(e) {
         var target = e.target,
             value = parseInt(target.value),
             hiddenInput = target.nextSibling;
@@ -153,41 +191,49 @@ Sudoku = {
         hiddenInput.value = value;
     },
 
-    numberExistsInGrid: function (data) {
-        var row, col, value;
+    removeInputValueFromMatrix: function (input, value) {
+        //deleting the value from the lookup arrays (row, column, section)
+        var row, col, sect;
 
-        value = data.value;
-        row = this.matrix[data.rowId];
-        col = this.matrix[data.colId];
-        sect = this.matrix[data.sectId];
+        value = parseInt(value);
 
-        if (row.indexOf(value) === -1) {
-            console.log(value, "already exists in row", data.rowId);
-            return true;
+        row = this.matrix["row" + input.dataset.row];
+        col = this.matrix["col" + input.dataset.col];
+        sect = this.matrix["sect" + input.dataset.sect];
+
+        if (row.indexOf(value) !== -1) {
+            console.log(value, "found, deleting it from row array", input.dataset.row);
+            row.splice(row.indexOf(value));
+//            col.splice(col.indexOf(value));
+//            sect.splice(sect.indexOf(value));
         }
 
-        if (col.indexOf(value) === -1) {
-            console.log(value, "already exists in col", data.colId);
-            return true;
+        if (col.indexOf(value) !== -1) {
+            console.log(value, "found, deleting it from col array", input.dataset.col);
+            col.splice(col.indexOf(value));
+//            sect.splice(sect.indexOf(value));
         }
 
-        if (sect.indexOf(value) === -1) {
-            console.log(value, "already exists in sect", data.sectId);
-            return true;
+        if (sect.indexOf(value) !== -1) {
+            console.log(value, "found, deleting it from sect array", input.dataset.sect);
+            sect.splice(sect.indexOf(value));
         }
-
-        return false;
     },
 
-
     validateNumber: function (data, input) {
-        var row, rowUniq, col, colUniq, sect, sectUniq, value, silent, result = true;
+        //given the number, and its position on the grid, check the number with the lookup arrays
+        //and either validate it or report error message to the game message element
+
+        var row, rowUniq, col, colUniq, sect, sectUniq, value, silent, result = true,
+            gameMessage = document.getElementById("game-message"),
+            message = "";
 
         if (input && input.value) {
             return;
         }
 
         if (this.isPuzzleSolved()) {
+            gameMessage.innerHTML = "<p>Puzzle Solved!</p>";
             console.warn("already solved!");
             return;
         }
@@ -202,6 +248,9 @@ Sudoku = {
         colUniq = col.indexOf(value) === -1;
         sectUniq = sect.indexOf(value) === -1;
 
+        console.log("rowUniq", rowUniq, "colUniq", colUniq, "sectUniq", sectUniq);
+        sectUniq = sect.indexOf(value) === -1;
+
         if (rowUniq && colUniq && sectUniq) {
             row.push(value);
             col.push(value);
@@ -210,34 +259,42 @@ Sudoku = {
             if (!silent) {
                 if (!rowUniq) {
                     console.error(value + " already exists in row", data.rowId);
+                    message += "<p>" + value + " already exists in " + data.rowId + ".</p>";
+
                 }
                 if (!colUniq) {
                     console.error(value + " already exists in col", data.colId);
+                    message += "<p>" + value + " already exists in " + data.colId + ".</p>";
                 }
                 if (!sectUniq) {
                     console.error(value + " already exists in sect", data.sectId);
+                    message += "<p>" + value + " already exists in " + data.sectId + ".</p>";
                 }
+                gameMessage.innerHTML = message;
             }
             result = false;
         }
 
-        if (this.isPuzzleSolved()) {
-            console.warn("already solved!");
-            return;
+        if (result && gameMessage) {
+            gameMessage.innerHTML = "<p>Good job...keep going!</p>";
         }
+
         return result;
     },
 
     buildRandomValue: function () {
-        var totalSubgrids = this.totalSubgrids,
-            randomRow = Math.ceil(Math.random() * totalSubgrids),
-            randomCol = Math.ceil(Math.random() * totalSubgrids),
-            randomValue = Math.ceil(Math.random() * totalSubgrids),
+        //check a random number, random input, and assign it the input
+        //ensure the input doesn't already have a value before assigning it
+
+        var gridLength = this.gridLength,
+            randomRow = Math.ceil(Math.random() * gridLength),
+            randomCol = Math.ceil(Math.random() * gridLength),
+            randomValue = Math.ceil(Math.random() * gridLength),
             sectId,
             data = {};
 
-        randomInput = Array.prototype.filter.call(document.getElementsByTagName("input"), function (a) {
-            return a.dataset.row == randomRow && a.dataset.col == randomCol;
+        randomInput = Array.prototype.filter.call(document.getElementsByTagName("input"), function (el) {
+            return el.dataset.row == randomRow && el.dataset.col == randomCol;
         });
 
         randomInput = randomInput[0];
@@ -258,20 +315,46 @@ Sudoku = {
     },
 
     buildRandomValues: function () {
-        //arbitrary choose totalSubgrids as the amount of random values to put
+        //arbitrary choose gridLength as the amount of random values to put
         //on the board;
 
-        for (var i = 0; i < this.totalSubgrids; i++) {
+        for (var i = 0; i < this.gridLength; i++) {
             this.buildRandomValue();
         }
+    },
+
+    loadCss: function () {
+        //load CSS file with javascript
+        var link;
+
+        link = document.createElement("link");
+        link.href = "https://rawgit.com/jcyl29/sudoku/master/sudoku.css";
+        link.type = "text/css";
+        link.rel = "stylesheet";
+        link.media = "screen,print";
+
+        document.getElementsByTagName("head")[0].appendChild(link);
+
+    },
+
+    buildMessageElement: function() {
+        var div = document.createElement("div");
+        div.id = "game-message";
+        div.innerHTML = "<p>Good Luck!</p>";
+        document.body.appendChild(div);
     },
 
     init: function (conf) {
         conf = conf || {};
 
         var table;
-        this.totalSubgrids = conf.totalSubgrids || 4;
-        this.totalSubdivisions = Math.sqrt(this.totalSubgrids);
+        this.gridLength = conf.gridLength || 9;
+
+        if (this.gridLength !== Math.pow(Math.ceil(Math.sqrt(this.gridLength)),2)) {
+            throw Error("number is not a square!");
+        }
+
+        this.totalSubdivisions = Math.sqrt(this.gridLength);
         this.buildGrid();
 
         table = document.getElementById("sudoku-table");
@@ -280,17 +363,13 @@ Sudoku = {
         table.addEventListener("blur", this.handleBlur.bind(this), true);
         table.addEventListener("focus", this.handleFocus.bind(this), true);
 
-        table.addEventListener("keyup", this.handleKeyup.bind(this));
+        table.addEventListener("keydown", this.handleKeyDown.bind(this));
+
         if (conf.prefillBoard) {
             this.buildRandomValues();
         }
 
-//        for (i = 1; i <= this.totalSubgrids; i++) {
-//            console.info("row" + i, this.matrix["row" + i]);
-//        }
+        this.loadCss();
+        this.buildMessageElement();
     }
 };
-
-Sudoku.init({totalSubgrids: 4, prefillBoard: true});
-
-
