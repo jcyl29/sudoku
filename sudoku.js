@@ -241,6 +241,7 @@ Sudoku = {
 
         if (this.validateNumber(data, randomInput)) {
             randomInput.value = randomValue;
+            randomInput.disabled = true;
         }
     },
 
