@@ -20,8 +20,9 @@
     height: 2em;
     font-size: 2em;
     border: none;
-    font-family: Courier, inherit;
+    font-family: Courier, monospace, serif;
     text-align: center;
+    color: darkblue;
 }
 
 #sudoku-table input:disabled {
@@ -31,9 +32,11 @@
     -webkit-user-select: none;
     -ms-user-select: none;
     user-select: none;
+    color: darkgrey;
+    background: white;
 }
 
-#sudoku-table .odd {
+#sudoku-table .odd, #sudoku-table .odd:disabled {
     background: lightblue;
 }
 
