@@ -56,7 +56,7 @@ Sudoku = {
                 sectionBorderClasses = sectionBorderClasses.join(" ");
 
                 html += "<td class='" + sectionBorderClasses + "'>" +
-                    "<input data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='text'><input type='hidden'>" +
+                    "<input data-sect='" + sectId + "' data-col=" + col + " data-row=" + row + " class='" + oddClassName + "' maxlength=1 type='tel'><input type='hidden'>" +
                     "</td>";
             }
         }
