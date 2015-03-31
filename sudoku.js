@@ -214,11 +214,6 @@ Sudoku = {
             return;
         }
 
-        if (this.isPuzzleSolved()) {
-            gameMessage.innerHTML = "<p>Puzzle Solved!</p>";
-            return;
-        }
-
         value = data.value;
         silent = data.silent;
         row = this.matrix[data.rowId];
@@ -254,6 +249,11 @@ Sudoku = {
 
         if (result && gameMessage) {
             gameMessage.innerHTML = "<p>Good job...keep going!</p>";
+        }
+
+        if (this.isPuzzleSolved()) {
+            gameMessage.innerHTML = "<p>Puzzle Solved!</p>";
+            return;
         }
 
         return result;
