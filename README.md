@@ -16,4 +16,6 @@ I wanted to make the game work on the modern browsers, such as IE11, Firefox, an
 * Start the game by calling ```Sudoku.init(conf)```.  conf is an optional configuration with the following parameters
 
     * ```gridLength```: the number of squares on each side of the board. Defaults to 9. A number given that is not a square will result in an error
-    * ```prefillBoard```: a Boolean to prefill the board with random Values. Defaults to false.
+    * ```prefillBoard```: a Boolean to prefill the board with random Values. Defaults to true.
+
+Demo can be seen here: https://jsfiddle.net/ynm9kohv/

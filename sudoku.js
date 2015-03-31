@@ -322,7 +322,10 @@ Sudoku = {
     init: function (conf) {
         conf = conf || {};
 
-        var table;
+        var table, prefillBoard;
+
+        prefillBoard = conf.prefillBoard || true;
+
         this.gridLength = conf.gridLength || 9;
 
         if (this.gridLength !== Math.pow(Math.ceil(Math.sqrt(this.gridLength)),2)) {
@@ -340,7 +343,7 @@ Sudoku = {
 
         table.addEventListener("keydown", this.handleKeyDown.bind(this));
 
-        if (conf.prefillBoard) {
+        if (prefillBoard) {
             this.buildRandomValues();
         }
 
