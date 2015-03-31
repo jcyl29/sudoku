@@ -200,6 +200,8 @@ Sudoku = {
         if (sect.indexOf(value) !== -1) {
             sect.splice(sect.indexOf(value));
         }
+
+        input.nextSibling.value= "";
     },
 
     validateNumber: function (data, input) {
