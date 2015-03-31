@@ -1,0 +1,52 @@
+#sudoku-table {
+    border-collapse: collapse;
+    border: solid 5px black;
+    margin: 0 auto;
+}
+
+#sudoku-table td {
+    border: solid 1px black;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+#sudoku-table tr {
+    border: solid 1px red;
+}
+
+#sudoku-table input {
+    width: 2em;
+    height: 2em;
+    font-size: 2em;
+    border: none;
+    font-family: Courier, inherit;
+    text-align: center;
+}
+
+#sudoku-table input:disabled {
+    font-family: Arial, Verdana, sans-serif;
+    -moz-user-select: -moz-none;
+    -khtml-user-select: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+#sudoku-table .odd {
+    background: lightblue;
+}
+
+#sudoku-table td.section-row-border {
+    border-bottom: solid 5px black;
+}
+
+#sudoku-table td.section-col-border {
+    border-right: solid 5px black;
+}
+
+#game-message {
+    margin-top: 1em;
+    background: lightblue;
+    text-align: center;
+}
