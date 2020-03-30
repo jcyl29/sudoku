@@ -1,12 +1,10 @@
-#Sudoku with Plain JavaScript
-#####Author: Justin Lui
-#####Email: justincylui AT Gmail DOT com
+# Sudoku with Plain JavaScript
 
-#Introduction
+# Introduction
 
 This is my take on programming a function sudoku board game with javascript.
 
-#Technology Considerations
+# Technology Considerations
 
 I wanted to make the game work on the modern browsers, such as IE11, Firefox, and Chrome.  Since I don't need to worry about cross browser issues with older browsers, I decided to build the game with plain JavaScript.
 
